@@ -45,18 +45,26 @@ class AP:
                                                    (20 * math.log10(eval(self.frequency))) - 32.44)
             return device_rssi
 
-        if self.current_device_count == self.device_limit: #if we are out of potential connections, we will deny the connection
-            self.AP_log.append(f'Step {self.currentStep}: {new_device.get_name()} TRIED {self.AP_name} BUT WAS DENIED')
-            return
+        if isinstance(new_device,Device):  # If we try to add a device, we make a dictionary of the device's information, and update our existing dictionary to include it
+            if self.current_device_count == self.device_limit: #if we are out of potential connections, we will deny the connection
+                self.AP_log.append(f'Step {self.currentStep}: {new_device.get_name()} TRIED {self.AP_name} BUT WAS DENIED')
+                return
 
-        if isinstance(new_device, Device): #If we try to add a device, we make a dictionary of the device's information, and update our existing dictionary to include it
             signal_strength = calc_rssi(new_device)
             self.network_devices.update({new_device.get_name() : [new_device.get_x(),new_device.get_y(),new_device.get_standard(), new_device.get_standard(), new_device.get_speed(), new_device.get_supports_11k(), new_device.get_supports_11v(), new_device.get_supports_11r(), new_device.get_minimal_rssi(), signal_strength]}) #Information will be stored in this order. x_coord, y_coord, standard,speed, supports_11k, supports_11v, supports_11r, minimal_rssi required, SIGNAL STRENGTH
             self.AP_log.append(f'Step {self.currentStep}: {new_device.get_name()} CONNECT LOCATION {new_device.get_x()} {new_device.get_y()} {new_device.get_standard()} {new_device.get_speed()} {new_device.get_supports_11k()} {new_device.get_supports_11v()} {new_device.get_supports_11r()}')
             self.current_device_count += 1
         else:
-            raise ValueError("Can only Device type objects to our Device Network")
+            raise ValueError("Can only add Device type objects to our Device Network")
 
+    def remove_device_from_network(self,r_device):
+        self.currentStep += 1
+        if not isinstance(r_device, Device):
+            raise ValueError("Can only remove Device type objects from our Device Network")
+        del self.network_devices[r_device.get_name()]
+        self.AP_log.append(f'Step {self.currentStep}: {r_device.get_name()} DISCONNECTS AT LOCATION {r_device.get_x()} {r_device.get_y()}')
+
+        self.current_device_count -= 1
     def protocol_radio_rm(self, data):
         # we're gonna need a network setup process in AC that has all the APs share themselves and their
         # details with each other

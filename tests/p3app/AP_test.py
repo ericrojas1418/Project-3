@@ -33,6 +33,12 @@ class MyTestCase(unittest.TestCase):
         print(self.test_AP.AP_log)
         assert len(self.test_AP.AP_log) == 2
 
+    def test_removal(self):
+        self.test_AP.add_device_to_network(self.test_device1)
+        self.test_AP.add_device_to_network(self.test_device2)
+        self.test_AP.remove_device_from_network(self.test_device1)
+        print(self.test_AP.AP_log)
+        assert self.test_AP.current_device_count == 1
     def tearDown(self):
         print(f'Exiting test number {MyTestCase.test_counter}')
         print()

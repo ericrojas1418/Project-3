@@ -39,6 +39,8 @@ class Device:
 
     def get_minimal_rssi(self):
         return self._minimal_rssi
+
+
 __all__ = [
     Device.__name__
 ]
