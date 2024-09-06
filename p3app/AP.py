@@ -55,3 +55,8 @@ class AP:
             pass
     def roaming_occurs(self):
         pass
+
+
+__all__ = [
+    AP.__name__
+]
