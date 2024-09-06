@@ -1,5 +1,5 @@
 import math
-
+from p3app.Device import Device
 class AP:
     def __init__(self, AP_name, x_coord, y_coord, channel, power_level, frequency, standard, supports_11k, supports_11v,
                  supports_11r, coverage_radius, device_limit, minimal_rssi=None):
@@ -18,7 +18,7 @@ class AP:
         self.minimal_rssi = minimal_rssi
 
         # internal memory
-        self.devices = {}
+        self.network_devices = {}
         self.AP_log = []
         self.currentStep = 0
 
@@ -30,12 +30,19 @@ class AP:
         #method to call method to update dictionary of device_rssi
         self.calc_rssi()
 
+    #this will come in helpful after movements
+    def add_device_to_network(self,new_device):
+        if isinstance(new_device,Device): #If we try to add a device, we make a dictionary of the device's information, and update our existing dictionary to include it
+            self.network_devices.update({new_device.get_name() : [new_device.get_name(), new_device.get_x(),new_device.get_y(),new_device.get_standard(), new_device.get_standard(), new_device.get_speed(), new_device.get_supports_11k(), new_device.get_supports_11v(), new_device.get_supports_11r(), new_device.get_minimal_rssi()]}) #Information will be stored in this order. x_coord, y_coord, standard,speed, supports_11k, supports_11v, supports_11r, minimal_rssi required
+        else:
+            raise ValueError("Can only Device type objects to our Device Network")
+
     def calc_rssi(self):
         def calculate_device_distance_from_ap(device):
             distance = math.sqrt(((device.x_coord - self.x_coord)**2) + ((device.y_cord - self.x_coord)**2))
             return distance
 
-        for device in self.devices:
+        for device in self.network_devices:
 
             device_rssi = self.power_level - (  (20 * math.log10(calculate_device_distance_from_ap(device))  ) - 20 * math.log10(self.frequency) - 32.44)
             self.device_rssi[device.name] = device_rssi
