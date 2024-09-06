@@ -28,24 +28,24 @@ class AP:
         }
         self.device_rssi = {}
         #method to call method to update dictionary of device_rssi
-        self.calc_rssi()
 
     #this will come in helpful after movements
-    def add_device_to_network(self,new_device):
-        if isinstance(new_device,Device): #If we try to add a device, we make a dictionary of the device's information, and update our existing dictionary to include it
-            self.network_devices.update({new_device.get_name() : [new_device.get_name(), new_device.get_x(),new_device.get_y(),new_device.get_standard(), new_device.get_standard(), new_device.get_speed(), new_device.get_supports_11k(), new_device.get_supports_11v(), new_device.get_supports_11r(), new_device.get_minimal_rssi()]}) #Information will be stored in this order. x_coord, y_coord, standard,speed, supports_11k, supports_11v, supports_11r, minimal_rssi required
+    def add_device_to_network(self,new_device): #To calculate signal strength, we inbed the two necessary functions, bc otherwise would be redundant
+        def calc_rssi(device):
+
+            def calculate_device_distance_from_ap(device):
+                distance = math.sqrt(((int(device.get_x()) - int(self.x_coord)) ** 2) + ((int(device.get_y()) - int(self.y_coord)) ** 2))
+                return distance
+
+            device_rssi = int(self.power_level) - ((20 * math.log10(calculate_device_distance_from_ap(device))) -
+                                                   (20 * math.log10(eval(self.frequency))) - 32.44)
+            return device_rssi
+
+        if isinstance(new_device, Device): #If we try to add a device, we make a dictionary of the device's information, and update our existing dictionary to include it
+            signal_strength = calc_rssi(new_device)
+            self.network_devices.update({new_device.get_name() : [new_device.get_x(),new_device.get_y(),new_device.get_standard(), new_device.get_standard(), new_device.get_speed(), new_device.get_supports_11k(), new_device.get_supports_11v(), new_device.get_supports_11r(), new_device.get_minimal_rssi(), signal_strength]}) #Information will be stored in this order. x_coord, y_coord, standard,speed, supports_11k, supports_11v, supports_11r, minimal_rssi required, SIGNAL STRENGTH
         else:
             raise ValueError("Can only Device type objects to our Device Network")
-
-    def calc_rssi(self):
-        def calculate_device_distance_from_ap(device):
-            distance = math.sqrt(((device.x_coord - self.x_coord)**2) + ((device.y_cord - self.x_coord)**2))
-            return distance
-
-        for device in self.network_devices:
-
-            device_rssi = self.power_level - (  (20 * math.log10(calculate_device_distance_from_ap(device))  ) - 20 * math.log10(self.frequency) - 32.44)
-            self.device_rssi[device.name] = device_rssi
 
     def protocol_radio_rm(self, data):
         # we're gonna need a network setup process in AC that has all the APs share themselves and their

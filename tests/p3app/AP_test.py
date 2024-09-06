@@ -9,6 +9,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_device_adding_works(self):
         self.test_AP.add_device_to_network(self.test_device1)
+        print(self.test_AP.network_devices)
         assert len(self.test_AP.network_devices) == 1
 
 if __name__ == '__main__':
